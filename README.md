@@ -1,5 +1,5 @@
 # HRMS (Human Resource Management System)
-### https://r.resimlink.com/Yosz.png PostgreSQL - Database
+### PostgreSQL - Database
 ### <a href="database.sql">Click</a> for script codes.
 * * *
 <!--

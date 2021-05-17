@@ -7,17 +7,16 @@ CREATE SCHEMA public;
 /*
  *   FUNCTIONS
 */
-CREATE OR REPLACE FUNCTION validate_email_by_domain(INTEGER, CHARACTER VARYING(255)) 
+CREATE OR REPLACE FUNCTION validate_email_by_domain(user_id INTEGER, web_address CHARACTER VARYING(255)) 
 RETURNS BOOLEAN AS $$
 DECLARE
 	DECLARE user_email_address varchar(320);
-	DECLARE web_address varchar(255);
     DECLARE result boolean;
 BEGIN
-	SELECT email_address INTO user_email_address FROM users where id = $1;
-    SELECT SUBSTRING(user_email_address,POSITION('@' in user_email_address) + 1) = $2 INTO result;
+	SELECT email_address INTO user_email_address FROM users where id = user_id;
+    SELECT web_address like '%' || SUBSTRING(user_email_address,POSITION('@' in user_email_address) + 1) INTO result;
 	IF result = false THEN
-		raise 'E-mail and web address must have the same domain name.';
+		raise 'E-mail(%) and web address(%) must have the same domain name.',user_email_address,web_address;
 	END IF;
 	RETURN result;
 END; $$ LANGUAGE plpgsql;
@@ -74,7 +73,7 @@ CREATE TABLE public.verification_codes(
 	code CHARACTER VARYING(38) NOT NULL,
 	is_verified boolean DEFAULT false NOT NULL,
 	CONSTRAINT pk_verification_codes PRIMARY KEY (id),
-	CONSTRAINT uc_verification_codes_is_verified UNIQUE (code)
+	CONSTRAINT uc_verification_codes_code UNIQUE (code)
 );
 
 CREATE TABLE public.verification_codes_candidates(
@@ -135,7 +134,7 @@ END $$;
 DO $$
     DECLARE employer_id integer;
 BEGIN
-	INSERT INTO public.users (email_address,password) VALUES('karcanozbal@karcanyazilim.com.tr','123456') RETURNING id INTO employer_id;
-	INSERT INTO public.employers (id,company_name,web_address) VALUES(employer_id,'Karcan Yazılım A.Ş.','karcanyazilim.com.tr');
+	INSERT INTO public.users (email_address,password) VALUES('karcanozbal@k-software.com','123456') RETURNING id INTO employer_id;
+	INSERT INTO public.employers (id,company_name,web_address) VALUES(employer_id,'Karcan Yazılım A.Ş.','www.k-software.com');
 	INSERT INTO public.employer_phones(employer_id,phone_number) VALUES(employer_id,'8505552233'),(employer_id,'8505552234'),(employer_id,'8505552235');
 END $$;
